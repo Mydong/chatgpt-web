@@ -1,8 +1,8 @@
-name: Sync Fork
+name: Sync Fork Upstream
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # every 30 minutes
+    - cron: '0 8 * * *' # every day 8am
   workflow_dispatch: # on button click
 
 jobs:
@@ -11,8 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: TG908/fork-sync@v1.6.3
+      - uses: AbdulmelikKalkan/sync-fork-upstream@v1.3
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           owner: zmlix
-          base: main
-          head: main
+          repo: chatgpt-web
+          branch: main
