@@ -1,21 +1,21 @@
 name: DockerBuild
 
 on:
-	push:
-		branches:
-			- main
+  push:
+    branches:
+      - 'main'
 
 jobs:
-	build:
-		runs-on: ubuntu-latest
+  build:
+  runs-on: ubuntu-latest
 steps:
-	- 
-		name: Git checkout
-		uses: actions/checkout@v2
-	- 
-		name: Build Docker image
-		uses: docker/build-push-action@v2
-		with:
-			context: ./ChatGPT/
-			push: true
-			trueags: secrets.DOCKERHUBU_USERNAME/chatgpt−web:{{ github.sha }}
+  - 
+   name: Git checkout
+   uses: actions/checkout@v2
+  - 
+   name: Build Docker image
+   uses: docker/build-push-action@v2
+   with:
+   context: ./ChatGPT/
+   push: true
+   tags: secrets.DOCKERHUBU_USERNAME/chatgpt−web:{{ github.sha }}
