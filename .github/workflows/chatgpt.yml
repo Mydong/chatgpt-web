@@ -1,0 +1,21 @@
+name: chatgpt-web Build Docker image
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t chatgpt-web .
+      - name: Publish Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: chatgpt-web:latest
+      - name: Clean up Docker images
+        run: docker image prune -f
