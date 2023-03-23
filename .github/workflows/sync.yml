@@ -15,6 +15,6 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
-          owner: zmlix
+          owner: Mydong
           repo: chatgpt-web
           branch: main
