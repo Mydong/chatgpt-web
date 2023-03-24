@@ -30,7 +30,7 @@ docker run --name chatgpt-web --restart=always -p 5200:5200 -d loewe24/chatgpt-w
 
 #### 免魔法接口：
 
-- 接口1：zeabur chatgpt-proxy 搭建：
+- 接口1：zeabur chatgpt-proxy 搭建：（不支持打字机模式）
   
   ```
   https://chatgptproxyapi.zeabur.app/proxy
@@ -47,7 +47,7 @@ docker run --name chatgpt-web --restart=always -p 5200:5200 -d loewe24/chatgpt-w
 
         注：原作者示例接口，建议自己搭建使用
 
-- 接口2：CF Worker中转 api.openai.com:
+- 接口2：CF Worker中转 api.openai.com: （支持打字机模式）
   
   原作者仓库-搭建教程：
   
