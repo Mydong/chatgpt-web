@@ -38,12 +38,16 @@ docker run --name chatgpt-web --restart=always -p 5200:5200 -d loewe24/chatgpt-w
   
   原作者仓库-搭建教程：
   [chatgpt-proxy/README-CN.md at main · imyuanx/chatgpt-proxy · GitHub](https://github.com/imyuanx/chatgpt-proxy/blob/main/README-CN.md ) 
+  
   One-click deployment of the ChatGPT private proxy, power by Next.js - chatgpt-proxy/README-CN.md at main · imyuanx/chatgpt-proxy
   
   使用方式：
+  
   本项目原配置API URL：`https://api.openai.com/v1/chat/completions` 替换为：
+  
   `https://chatgpt-proxy-preview.zeabur.app/proxy/v1/chat/completions`  
-   注：原作者示例接口，建议自己搭建使用
+  
+  注：原作者示例接口，建议自己搭建使用
 
 - 接口2：CF 
   
