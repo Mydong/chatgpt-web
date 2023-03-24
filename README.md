@@ -57,7 +57,7 @@ docker run --name chatgpt-web --restart=always -p 5200:5200 -d loewe24/chatgpt-w
   
   本项目原配置API URL：`https://api.openai.com/v1/chat/completions` 替换为：
   
-  ``https://openai.1rmb.tk/v1/chat/completions`
+  `https://openai.1rmb.tk/v1/chat/completions`
   
   注：原作者示例接口，建议自己搭建使用
   
@@ -72,5 +72,3 @@ docker run --name chatgpt-web --restart=always -p 5200:5200 -d loewe24/chatgpt-w
   
   
   
-
-
