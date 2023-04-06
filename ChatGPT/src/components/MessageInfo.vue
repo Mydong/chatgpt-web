@@ -1,6 +1,8 @@
 <script setup>
 import { Refresh, UserFilled } from '@element-plus/icons-vue'
 import { ref, computed, watch } from 'vue'
+import xss from 'xss'
+import 'github-markdown-css'
 import markdown from 'markdown-it'
 import hljs from 'markdown-it-highlightjs'
 import katex from 'markdown-it-katex'
@@ -21,10 +23,46 @@ const props = defineProps({
   }
 })
 
+const whiteList = (() => {
+  let wl = xss.getDefaultWhiteList()
+  let mathML = [
+    'math',
+    'mi',
+    'mn',
+    'mo',
+    'ms',
+    'msup',
+    'msub',
+    'mfrac',
+    'mroot',
+    'msqrt',
+    'mtable',
+    'mtr',
+    'mtd',
+    'mrow',
+    'mmultiscripts',
+    'semantics',
+    'annotation'
+  ]
+  for (var i = 0; i < mathML.length; i++) {
+    wl[mathML[i]] = []
+  }
+  for (var key in wl) {
+    wl[key].push('class', 'style')
+  }
+  wl.annotation.push('encoding')
+  return wl
+})()
+
+const XSS = new xss.FilterXSS({
+  whiteList: whiteList,
+  css: false
+})
+
 const md = markdown({
   html: true,
   linkify: true,
-  typographer: true,
+  typographer: false,
   breaks: true
 })
   .use(katex)
@@ -32,7 +70,7 @@ const md = markdown({
   .use(md_tb)
 
 const markdown_msg = computed(() => {
-  return '<div>' + md.render(props.message.msg || '') + '</div>'
+  return XSS.process(md.render(props.message.msg || ''))
 })
 
 const raw_msg = computed(() => {
@@ -112,35 +150,40 @@ watch(
   () => sending.isSending || showMsgRef.value,
   (isShowMsg) => {
     if (isShowMsg && showMsgRef) {
-      const hljs_blocks = showMsgRef.value.getElementsByClassName('hljs')
-      if (hljs_blocks.length) {
-        for (let i = 0; i < hljs_blocks.length; i++) {
-          const copyCodeDiv = document.createElement('div')
-          copyCodeDiv.classList.add('copy-code')
-          const buttonElem = document.createElement('button')
-          buttonElem.classList.add('el-button', 'el-button--small')
-          buttonElem.innerHTML = '<span>复制代码</span>'
-          buttonElem.addEventListener('click', async () => {
-            try {
-              await toClipboard(hljs_blocks[i])
-              showMessage('复制成功', 'success')
-            } catch (e) {
-              console.error(e)
-              showMessage('复制失败', 'error')
-            }
-          })
-          buttonElem.addEventListener('mouseover', () => {
-            copyCodeDiv.style.display = 'flex'
-          })
-          copyCodeDiv.appendChild(buttonElem)
-          hljs_blocks[i].insertAdjacentElement('beforeBegin', copyCodeDiv)
-          hljs_blocks[i].addEventListener('mouseover', () => {
-            copyCodeDiv.style.display = 'flex'
-          })
-          hljs_blocks[i].addEventListener('mouseout', () => {
-            copyCodeDiv.style.display = 'none'
-          })
+      try {
+        const hljs_blocks = showMsgRef.value.getElementsByClassName('hljs')
+        if (hljs_blocks.length) {
+          for (let i = 0; i < hljs_blocks.length; i++) {
+            const pre = hljs_blocks[i].parentElement
+            const copyCodeDiv = document.createElement('div')
+            copyCodeDiv.classList.add('copy-code')
+            const buttonElem = document.createElement('button')
+            buttonElem.classList.add('el-button', 'el-button--small')
+            buttonElem.innerHTML = '<span>复制代码</span>'
+            buttonElem.addEventListener('click', async () => {
+              try {
+                await toClipboard(pre)
+                showMessage('复制成功', 'success')
+              } catch (e) {
+                console.error(e)
+                showMessage('复制失败', 'error')
+              }
+            })
+            buttonElem.addEventListener('mouseover', () => {
+              copyCodeDiv.style.display = 'flex'
+            })
+            copyCodeDiv.appendChild(buttonElem)
+            pre.insertAdjacentElement('beforeBegin', copyCodeDiv)
+            pre.addEventListener('mouseover', () => {
+              copyCodeDiv.style.display = 'flex'
+            })
+            pre.addEventListener('mouseout', () => {
+              copyCodeDiv.style.display = 'none'
+            })
+          }
         }
+      } catch (error) {
+        console.log(error)
       }
     }
   }
@@ -163,7 +206,9 @@ watch(
           style="background: transparent; width: 40px; margin-top: 5px"
         />
       </div>
-      <div class="flex flex-col justify-center w-full message-body">
+      <div
+        class="flex flex-col justify-center w-full px-2.5 py-px my-0.5 mx-0 bg-white rounded-md text-sm max-w-full"
+      >
         <div class="flex justify-between items-end">
           <div class="flex items-center gap-2 mx-1 md:hidden">
             <el-avatar
@@ -226,7 +271,7 @@ watch(
         <el-divider style="margin: 5px"></el-divider>
         <div class="mt-2 mb-1 overflow-x-auto" v-show="!isCollapse">
           <div v-if="!isMarkdown" class="whitespace-pre-wrap">{{ raw_msg }}</div>
-          <div v-else v-html="markdown_msg" ref="showMsgRef"></div>
+          <div v-else v-html="markdown_msg" ref="showMsgRef" class="markdown-body"></div>
         </div>
         <el-row :gutter="10" v-show="isEdit" class="mb-2">
           <el-col :span="21">
@@ -261,16 +306,6 @@ watch(
 
 .message-box-loading .el-loading-mask {
   background-color: transparent;
-}
-
-.message-body {
-  padding: 1px 10px;
-  margin: 3px 0;
-  background: #ffffff;
-  border-radius: 5px;
-  font-size: 14px;
-  max-width: 100%;
-  min-height: 30px;
 }
 
 .copy-code {

@@ -71,6 +71,12 @@ export const useMessagesStore = defineStore('messages', () => {
     setMessages(chatStore.getChatByIdx(idx))
   }
 
+  function getNextMessages(step) {
+    const idx = chatStore.getNextChat(step).idx
+    console.log(idx)
+    getMessages(idx)
+  }
+
   function delMessages(idx) {
     chatStore.delChatByIdx(idx)
     if (chatStore.length === 0) {
@@ -86,7 +92,11 @@ export const useMessagesStore = defineStore('messages', () => {
     body.temperature = sysStore.temperature
 
     if (body.stream) {
-      const streamId = pushMessage('', { role: 'assistant', status: 'success' }, params)
+      const streamId = pushMessage(
+        '',
+        { role: 'assistant', status: 'success', skip: sysStore.skipHistoryMessages },
+        params
+      )
       const sse = post_GetMessage(body, sysStore.API_KEY, sysStore.API_URL)
       sse.addEventListener('message', (e) => {
         if (e.data == '[DONE]' || !sending.isSending) {
@@ -145,7 +155,11 @@ export const useMessagesStore = defineStore('messages', () => {
           ChatGPTApiSource.value.token
         )
         const message = response.data.choices[0].message.content
-        pushMessage(message, { role: 'assistant', status: 'success' }, params)
+        pushMessage(
+          message,
+          { role: 'assistant', status: 'success', skip: sysStore.skipHistoryMessages },
+          params
+        )
       } catch (error) {
         if (axios.isCancel(error)) {
           pushMessage(
@@ -188,7 +202,7 @@ export const useMessagesStore = defineStore('messages', () => {
     }
     msg.id = random32BitNumber()
     msg.time = Date.now()
-    msg.skip = msg.status !== 'success'
+    msg.skip = msg.skip || msg.status !== 'success'
     if ('insert' in params) {
       const id = params.insert.id
       const idx = messages.value.findIndex((item) => item.id === id)
@@ -255,6 +269,7 @@ export const useMessagesStore = defineStore('messages', () => {
     initMessages,
     newMessages,
     getMessages,
+    getNextMessages,
     delMessages,
     getMessage,
     push,
