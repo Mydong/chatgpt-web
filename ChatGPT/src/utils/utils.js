@@ -1,4 +1,56 @@
 import { ElMessage } from 'element-plus'
+import markdown from 'markdown-it'
+import hljs from 'markdown-it-highlightjs'
+import katex from 'markdown-it-katex'
+import md_tb from 'markdown-it-multimd-table'
+import xss from 'xss'
+
+const whiteList = (() => {
+  let wl = xss.getDefaultWhiteList()
+  let mathML = [
+    'math',
+    'mi',
+    'mn',
+    'mo',
+    'ms',
+    'msup',
+    'msub',
+    'mfrac',
+    'mroot',
+    'msqrt',
+    'mtable',
+    'mtr',
+    'mtd',
+    'mrow',
+    'mmultiscripts',
+    'semantics',
+    'annotation'
+  ]
+  for (var i = 0; i < mathML.length; i++) {
+    wl[mathML[i]] = []
+  }
+  for (var key in wl) {
+    wl[key].push('class', 'style')
+  }
+  wl.annotation.push('encoding')
+  wl.ol.push('start')
+  return wl
+})()
+
+export const XSS = new xss.FilterXSS({
+  whiteList: whiteList,
+  css: false
+})
+
+export const MD = markdown({
+  html: true,
+  linkify: true,
+  typographer: false,
+  breaks: true
+})
+  .use(katex)
+  .use(hljs)
+  .use(md_tb)
 
 export const random32BitNumber = () => {
   const maxInt32 = 0xffffffff
@@ -28,29 +80,35 @@ export const downloadImg = (data, name) => {
   downloadLink.download = name
   document.body.appendChild(downloadLink)
   downloadLink.click()
-  document.body.removeChild(downloadLink)
+  setTimeout(() => {
+    document.body.removeChild(downloadLink)
+  }, 1000)
 }
 
 export const downloadMarkdown = (data, name) => {
   const fileContent = data
-  const blob = new Blob([fileContent], { type: 'text/plain' })
+  const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' })
   const downloadLink = document.createElement('a')
   downloadLink.href = URL.createObjectURL(blob)
   downloadLink.download = name
   document.body.appendChild(downloadLink)
   downloadLink.click()
-  document.body.removeChild(downloadLink)
+  setTimeout(() => {
+    document.body.removeChild(downloadLink)
+  }, 1000)
 }
 
 export const downloadJson = (data) => {
   const jsonString = JSON.stringify(data)
-  const blob = new Blob([jsonString], { type: 'application/json' })
+  const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' })
   const downloadLink = document.createElement('a')
   downloadLink.href = URL.createObjectURL(blob)
   downloadLink.download = 'chats.json'
   document.body.appendChild(downloadLink)
   downloadLink.click()
-  document.body.removeChild(downloadLink)
+  setTimeout(() => {
+    document.body.removeChild(downloadLink)
+  }, 1000)
 }
 
 export const uploadJson = (file, fn) => {
