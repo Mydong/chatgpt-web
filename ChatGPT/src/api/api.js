@@ -85,7 +85,7 @@ export const get_GetCreditGrants = (api_url, api_key) => {
 const PromptApi = axios.create(axiosConfig)
 export const get_GetPrompts = (cancelToken) => {
   return PromptApi.get(
-    'https://ghproxy.com/https://raw.githubusercontent.com/Mydong/awesome-chatgpt-prompts-zh/main/prompts-zh.json',
+    'https://raw.githubusercontent.com/PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json',
     {
       cancelToken: cancelToken,
       timeout: DEFAULT_TIMEOUT
