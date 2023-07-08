@@ -35,6 +35,10 @@ export const useMessagesStore = defineStore('messages', () => {
     sending.id = val
   }
 
+  function setSendingType(val) {
+    sending.typ = val
+  }
+
   function setDisplay(val) {
     display.value = val
     let chat = chatStore.getCurrentChat()
@@ -150,7 +154,18 @@ export const useMessagesStore = defineStore('messages', () => {
         try {
           error_msg = JSON.parse(e.data)
         } catch (error) {
-          error_msg = { details: '未知错误' }
+          if (error.name === 'SyntaxError') {
+            console.log('eeeee', error)
+            const pattern = /\{[\s\S]*\}/
+            const match = e.data.match(pattern)
+            if (match) {
+              error_msg = JSON.parse(match[0])
+            } else {
+              error_msg = { details: '未知错误' }
+            }
+          } else {
+            error_msg = { details: '未知错误' }
+          }
         }
         del(streamId)
         pushMessage(
@@ -158,7 +173,7 @@ export const useMessagesStore = defineStore('messages', () => {
             '```json\n' +
             JSON.stringify(error_msg, null, 4) +
             '\n```',
-          { typ: 'sys', status: 'error', role: null, skip: true },
+          { status: 'error', role: 'error', skip: true },
           params
         )
       })
@@ -187,7 +202,7 @@ export const useMessagesStore = defineStore('messages', () => {
         if (axios.isCancel(error)) {
           pushMessage(
             '<font color="red">Error: 请求中断</font>',
-            { typ: 'sys', status: 'error' },
+            { status: 'error', role: 'error', skip: true },
             params
           )
         } else {
@@ -202,7 +217,7 @@ export const useMessagesStore = defineStore('messages', () => {
               '```json\n' +
               JSON.stringify(error_msg, null, 4) +
               '\n```',
-            { typ: 'sys', status: 'error' },
+            { status: 'error', role: 'error', skip: true },
             params
           )
         }
@@ -219,13 +234,14 @@ export const useMessagesStore = defineStore('messages', () => {
 
   function push(msg, params = {}) {
     if (length.value === 0) {
-      let title = msg.msg.slice(0, 13) + (msg.msg.length <= 13 ? '' : '...')
+      let title = msg.msg.slice(0, 25) + (msg.msg.length <= 25 ? '' : '...')
       console.log('title', title)
       chatStore.renameChatByIdx(mId.value, title)
     }
     msg.id = random32BitNumber()
     msg.time = Date.now()
     msg.skip = msg.skip || msg.status !== 'success'
+    msg.model = msg.model || sysStore.model
     if ('insert' in params) {
       const id = params.insert.id
       const idx = messages.value.findIndex((item) => item.id === id)
@@ -303,6 +319,7 @@ export const useMessagesStore = defineStore('messages', () => {
     getHistoryMsg,
     sending,
     setIsSending,
-    setSendingId
+    setSendingId,
+    setSendingType
   }
 })
